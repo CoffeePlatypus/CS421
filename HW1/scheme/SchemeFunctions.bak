@@ -1,0 +1,6 @@
+(define (pair x y )
+  (cond ((null? x) '())
+        ((null? y) '())
+        (else (cons (cons (car x) (cons (car y) '())) (pair (cdr x) (cdr y))))))
+
+(pair '(a b c d) '(1 2 3 4))

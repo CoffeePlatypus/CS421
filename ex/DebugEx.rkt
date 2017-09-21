@@ -1,0 +1,5 @@
+(define (my-lenght list)
+  (display list) (newline)
+  (cond ((null? list) 0)
+        (else ( + 1 (my-lenght(cdr list))))))
+  (my-lenght '(1 2 3 4))
