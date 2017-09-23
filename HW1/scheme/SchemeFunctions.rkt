@@ -67,16 +67,31 @@
 
 ;infix
 (define (infix exp)
-  (display exp)
-  (display "\n")
   (cond ((null? exp) exp)
-        ((null? (cdr exp)) exp)
+        ((and (null? (cdr exp)) (carnotlist exp)) exp)
+        ((null? (cdr exp)) (list (infix (car exp))))
         ((carnotlist (cdr exp)) (cons (cadr exp) (cons (car exp) (infix(cdr (cdr exp)))))) 
         (else (cons (infix(cadr exp)) (cons (car exp) (infix (cdr (cdr exp))))))))
 
-;(infix '(+ 3 4))
-;(infix '(- (+ 3 4) 6))
-(infix '(+ (- 3 5) (* 12 3)))
+;env
+(define (make-env l) '())
+
+(define (def-var env var val)
+  (cons (cons var (cons val '())) env))
+
+(define
+
+
+;evaluate
+;(define (evauate exp))
+
+
+
+
+
+  
+  
+  
   
 
 
