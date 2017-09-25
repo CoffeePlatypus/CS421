@@ -88,9 +88,6 @@
   (cond ((null? vars) env)
         (else (def-var (make-env (cdr vars) env) (car(car vars)) (cadr (car vars))))))
 
-;(def-var (start-env) 'a '1)
-(get (make-env '((s 2) (r 3) (t 2)) (make-env '((a 1) (b 1) (w 2)) (start-env))) 'r)
-
 ;evaluate
 (define (evaluate exp)
   (evaluator exp (start-env)))
@@ -112,20 +109,3 @@
         ((symbol? exp) (get env exp))
         ((is-bin-op? (car exp)) (operate (car exp) (evaluator (cadr exp) env) (evaluator (caddr exp) env)))
         (else (evaluator (cadr exp) (make-env (car exp) env)))))
-
- 
-
-
-
-
-  
-  
-  
-  
-
-
-
-
-
-
-  

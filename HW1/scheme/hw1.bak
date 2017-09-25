@@ -112,6 +112,11 @@
         ((symbol? exp) (get env exp))
         ((is-bin-op? (car exp)) (operate (car exp) (evaluator (cadr exp) env) (evaluator (caddr exp) env)))
         (else (evaluator (cadr exp) (make-env (car exp) env)))))
+(evaluate '(+ 1 3))
+(evaluate '(((a 1)(b 2))(- a 2)))
+(evaluate '(((z 3) (q 2)) (+ z (/ 4 2))))
+(evaluate '(((z 3) (q 2)) (+ z (/ (((q 3)) (+ q 1)) 2))))
+(evaluate '(((z 3) (a -3)) (+ p a)))
 
  
 
