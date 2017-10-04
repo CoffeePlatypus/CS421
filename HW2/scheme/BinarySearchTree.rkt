@@ -53,7 +53,17 @@
 ;remove
 
 ;preorder
-;(define (bst-pre-elements bst)
+(define (bst-pre-elements bst)
+  (cond ((null? bst) '())
+        (else (cons (car bst) (append (bst-pre-elements (cadr bst)) (bst-pre-elements (caddr bst)))))))
+;inorder
+(define (bst-in-elements bst)
+  (cond ((null? bst) bst)
+        (else (append (bst-in-elements (cadr bst)) (cons (car bst) (bst-in-elements (caddr bst)))))))
+;postorder
+(define (bst-post-elements bst)
+  (cond ((null? bst) bst)
+        (else (append (bst-post-elements (cadr bst)) (append (bst-post-elements (caddr bst)) (cons (car bst) '()))))))
 
 ;tree maker
 (define (list->bst xs f)
@@ -64,5 +74,7 @@
         (else (tree-maker (bst-insert bst f (car xs)) (cdr xs) f))))
 ;tree maker
   
-(list->bst '(6 5 7 3 4 9) >)  
-(bst-remove (bst-insert (bst-insert (bst-create-empty) < 1) > 3) = > 1)
+(bst-post-elements (list->bst '(6 5 7 3 4 9) >) )
+(bst-pre-elements (list->bst '(6 5 7 3 4 9) >) )
+(bst-in-elements (list->bst '(6 5 7 3 4 9) >) ) 
+;(bst-pre-elements (bst-insert (bst-insert (bst-create-empty) < 1) > 3) = > 1)
