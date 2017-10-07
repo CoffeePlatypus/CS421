@@ -6,16 +6,12 @@
   (list root left right))
 
 (define (bst-is-leaf? bst)
-  (and (equal? (cadr bst) '()) (equal? (caddr bst) '())) #t)
+  (and (equal? (cadr bst) '()) (equal? (caddr bst) '())))
         
-
-;(bst-create 3 '(2 () ()) '())
-
-
 ;insert
 (define (bst-insert bst f x)
   (cond ((equal? bst '()) (bst-create x (bst-create-empty) (bst-create-empty)))
-        ((f (car bst) x) (bst-insert-left bst f x))
+        ((f x (car bst)) (bst-insert-left bst f x))
         (else (bst-insert-right bst f x))))
   
 (define (bst-insert-left bst f x)
@@ -31,8 +27,8 @@
 (define (bst-contains bst f g x)
   (display bst)
   (cond ((equal? bst '()) #f)
-        ((f (car bst) x) #t)
-        ((g (car bst) x) (bst-contains (cadr bst) f g x))
+        ((f x (car bst)) #t)
+        ((g x (car bst)) (bst-contains (cadr bst) f g x))
         (else (bst-contains (caddr bst) f g x))))
 ;contains
 
@@ -41,16 +37,20 @@
   (display bst)
   (display "\n")
   (cond ((equal? bst '()) '())
-        ((f (car bst) x) (bst-remove-root bst))
-        ((g (car bst) x) (list (car bst) (bst-remove (cadr bst) f g x) (caddr bst)))
+        ((f x (car bst)) (bst-remove-element bst f g))
+        ((g x (car bst)) (list (car bst) (bst-remove (cadr bst) f g x) (caddr bst)))
         (else (list (car bst) (cadr bst) (bst-remove (caddr bst) f g x)))))
 
-(define (bst-remove-root bst)
+(define (bst-remove-element bst f g)
   (cond ((bst-is-leaf? bst) '(() () ()))
         ((bst-is-leaf? (cadr bst)) (list (cadr bst) '() (caddr bst)))
         ((bst-is-leaf? (caddr bst)) (list (caddr bst) (cadr bst) '()))
-        (else '()))) ;no
-;remove
+        (else (list (bst-max (cadr bst)) (bst-remove (cadr bst) f g(bst-max (cadr bst))) (caddr bst))))) ;no'=
+
+(define (bst-max bst)
+  (cond ((null? bst) bst)
+        ((null? (caddr bst)) (car bst))
+        (else (bst-max (caddr bst)))))
 
 ;preorder
 (define (bst-pre-elements bst)
@@ -73,8 +73,10 @@
   (cond ((equal? xs '()) bst)
         (else (tree-maker (bst-insert bst f (car xs)) (cdr xs) f))))
 ;tree maker
-  
-(bst-post-elements (list->bst '(6 5 7 3 4 9) >) )
-(bst-pre-elements (list->bst '(6 5 7 3 4 9) >) )
-(bst-in-elements (list->bst '(6 5 7 3 4 9) >) ) 
+(bst-is-leaf? (list->bst '(6 5 7 3 4 9) <))
+(bst-remove (list->bst '(6 5 7 3 4 9) <) = < 6)
+(bst-post-elements (list->bst '(6 5 7 3 4 9) <) )
+(bst-pre-elements (list->bst '(6 5 7 3 4 9) <) )
+(bst-in-elements (list->bst '(6 5 7 3 4 9) <) ) 
 ;(bst-pre-elements (bst-insert (bst-insert (bst-create-empty) < 1) > 3) = > 1)
+(6 (5 (3 () (4 () ())) ()) (7 () (9 () ())))

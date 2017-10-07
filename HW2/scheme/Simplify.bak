@@ -34,7 +34,7 @@
         ((and (number? exp1) (number? exp2)) (- exp1 exp2))
         (else (list '- exp1 exp2))))
 
-
+(define (divide exp1 exp2)
   
         
 
