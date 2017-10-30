@@ -235,23 +235,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;evaluator
 
-(define (operate op exp1 exp2)
-  (cond ((equal? exp1 "undefined") exp1)
-        ((equal? exp2 "undefined") exp2)
-        ((equal? '+ op) (add exp1 exp2))
-        ((equal? '- op) (sub exp1 exp2))
-        ((equal? '/ op) (div exp1 exp2))
-        ((equal? '* op) (mult exp1 exp2))
-        ((equal? '@ op) (expon exp1 exp2))
-        ((equal? '"#" op) (rem exp1 exp2))
-        ((equal? '< op) (lt exp1 exp2))
-        ((equal? '> op) (gt exp1 exp2))
-        ((equal? '= op) (eq exp1 exp2))
-        ((equal? '<= op) (lteq exp1 exp2))
-        ((equal? '>= op) (gteq exp1 exp2))
-        ((equal? '& op) (land exp1 exp2))
-        ((equal? '% op) (lor exp1 exp2))))
-
 (define (add exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (+ exp1 exp2))
         (else (error "invalid operation on type"))))
@@ -279,6 +262,9 @@
 (define (lt exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (< exp1 exp2))
         (else (error "invalid operation on type"))))
+(define (gt exp1 exp2)
+  (cond ((and (number? exp1) (number? exp2)) (> exp1 exp2))
+        (else (error "invalid operation on type"))))
 
 (define (gteq exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (>= exp1 exp2))
@@ -291,7 +277,7 @@
 (define (eq exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (= exp1 exp2))
         (else (error "invalid operation on type"))))
-
+;confused why land and lor take interger inputs
 (define (land exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (and exp1 exp2))
         (else (error "invalid operation on type"))))
@@ -299,6 +285,23 @@
 (define (lor exp1 exp2)
   (cond ((and (number? exp1) (number? exp2)) (or exp1 exp2))
         (else (error "invalid operation on type"))))
+
+(define (operate op exp1 exp2)
+  (cond ((equal? exp1 "undefined") exp1)
+        ((equal? exp2 "undefined") exp2)
+        ((equal? '+ op) (add exp1 exp2))
+        ((equal? '- op) (sub exp1 exp2))
+        ((equal? '/ op) (div exp1 exp2))
+        ((equal? '* op) (mult exp1 exp2))
+        ((equal? '@ op) (expon exp1 exp2))
+        ((equal? '"#" op) (rem exp1 exp2))
+        ((equal? '< op) (lt exp1 exp2))
+        ((equal? '> op) (gt exp1 exp2))
+        ((equal? '= op) (eq exp1 exp2))
+        ((equal? '<= op) (lteq exp1 exp2))
+        ((equal? '>= op) (gteq exp1 exp2))
+        ((equal? '& op) (land exp1 exp2))
+        ((equal? '% op) (lor exp1 exp2))))
 
 ;; "-" will be problem; both bi and un
 (define (is-un-op? op)
@@ -313,11 +316,11 @@
 (define (evaluator exp state)
   (cond ((number? exp) exp)
         ((equal? "undefined" exp) exp)
-        ((equal? 'true) exp)
-        ((equal? 'false) exp)
+        ((equal? 'true exp) exp)
+        ((equal? 'false exp) exp)
         ((symbol? exp) (state-get-value state exp))
         ((is-bin-op? (car exp)) (operate (car exp) (evaluator (cadr exp) state) (evaluator (caddr exp) state)))
-        ((is-un-op?) )))
+        ((is-un-op? (car exp)))))
 
 ;; INPUT: A PROGRAM
 ;; A PROGRAM has syntactic structure (program stmt)
@@ -354,26 +357,43 @@
 
 ;block
 (define (interpret-block stmt state)
-  (display "block") (newline)
+  (display "block ") (newline)
   ;(display (null? (cdr stmt)))
-  (cond ((null? stmt) state)
+  (cond ((or (null? stmt) (null? (cdr stmt))) state)
+        ((null? (cadr stmt)) (interpret-block (cdr stmt) state))
         (else (interpret-block (cdr stmt) (interpret (cadr stmt) state)))))
  
-  
-  
-
 ;declare //good?
 (define (interpret-declaration stmt state)
-  (display "declare") (newline)
+  (display "declare ") (newline)
   (state-add state (caddr stmt)))
 
-;assign;; will need to evaluate val probably
+;assign;;
 (define (interpret-assignment stmt state)
-(display (caddr stmt))
-(state-update state (cadr stmt) (caddr stmt)))
+(state-update state (cadr stmt) (evaluator (caddr stmt) state)))
 
 ;while
 (define (interpret-while stmt state)
+  (display "while ") (newline)
+  (display (evaluator (cadr stmt) state))
+  (cond ((evaluator (cadr stmt) state) (display "doing loop ") (interpret-while stmt (interpret (caddr stmt) state)));do stuff
+        (else state))) ;dont
+
+;if
+(define (interpret-if stmt state)
+  (display "if ") (newline)
+  (cond ((evaluator (cadr stmt) state) (display "doing if ") (interpret (caddr stmt) state));do stuff
+        (else state)))
+
+;sprint
+(define (interpret-sprint stmt state)
+  (newline)
+  (display (cadr stmt))
+  (display (evaluator (caddr stmt) state))
+  (newline)
+  state)
+         
+         
   
 
  
@@ -402,11 +422,20 @@
                 (declare int local)
                 (:= n 5)
                 (:= local n)
-                (while (> local 0)
+                (if (> local 0)
                        (block
                         (:= result (* result local))
                         (:= local (- local 1)))))
               (sprint "result: " result)
               (if (! error) (sprint "a") (sprint "b")))))
 
-(interpret-program pgm)
+(define simpgm '(program
+                 (block
+                  (declare int n)
+                  (:= n 5)
+                  (while (> n 1)
+                      (:= n (- n 1))
+                      (sprint "n: " n)
+                      ))))
+
+(interpret-program simpgm)
