@@ -1,4 +1,4 @@
-#lang racket
+;#lang racket
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; UTILITY FUNCTIONS
@@ -253,7 +253,16 @@
           ((equal? kind 'sprint) (interpret-sprint stmt state))
           ((equal? kind 'while) (interpret-while stmt state))       
           (else (error (string-append "statement expected but saw (" (exp->string stmt) "...) instead."))))))
+;;intpret block todo
+(define (interpret-block stmt state)
+  (block-get-body stmt))
 
+
+
+  
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define pgm '(program 
               (block
                (declare int n)
@@ -270,6 +279,64 @@
                         (:= result (* result local))
                         (:= local (- local 1)))))
               (sprint "result: " result)
-              (if (! error) (sprint "a") (sprint "b")))))
+              (if (~ error) (sprint "a") (sprint "b")))))
 
-(interpret-program pgm)
+;(interpret-program pgm)
+
+(cdr (car (cdr pgm)))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Validity checker
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+; ( program <block> )
+(define (validpro code)
+  (cond ((equal? (car code) 'program) (validblock (program-get-body code) (typemap-create-empty)))
+        (else #f)))
+; ( block <declarations> <block> )
+(define (validblock code typemap)
+  (cond ((equal? (car code) 'block) (valid-inblock (car(cdr code)) typemap))
+        (else #f)))
+; {<decl>} {<statemnt>}
+;<statemnt> => <BLOCK> | <ASSIGN> | <IF> | <WHILE> | <SPRINT>;
+(define (valid-inblock code typemap);
+  (let ((type (car code)))
+    (cond ((equal? type 'block) (valid-inblock (car(cdr code)) typemap)); cdr <declarations> <body> => {<decl>} {<statement>}
+          ((equal? type 'declare) (valid-declare (car(cdr code)) typemap)); cdr <type> <variable>
+          ((equal? type ':=)      ); cdr <variable> <expression>
+          ((equal? type 'if)      ); cdr <expression> <statement> <statment> 
+          ((equal? type 'while)   ); cdr <expression> <statement>
+          ((equal? type 'sprint)  ); cdr <expression> [ <expression> ]
+          ( else #f))))
+;<type> <variable>
+(define (valid-declare code typemap)
+  (let ((type (car code)))
+    (cond ((or (equal? type 'int) (equal? type 'boolean))
+           (cond ((valid-var-name ))))))) ;trash;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+  
+          
+
+  
+
+
+           
+
+
+
+
+
+
+
+
+;(define (is-program-valid? pgm))

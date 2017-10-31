@@ -1,3 +1,5 @@
+;#lang racket
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; UTILITY FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -70,12 +72,6 @@
         ((equal? (car (car map)) key) (cdr map))
         (else (cons (car map)
                     (map-delete (cdr map) key)))))
-
-;had to add filter
-(define (filter f list)
-  (cond ((null? list) '())
-        ((f (car list)) (cons (car list) (filter f (cdr list))))
-        (else (filter f (cdr list)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; TYPEMAP : A SEMANTIC DOMAIN DATA TYPE
@@ -232,103 +228,6 @@
   (cond ((equal? sym 'true) #t)
         ((equal? sym 'false) #f)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;evaluator
-
-(define (add exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (+ exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (sub exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (- exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (mult exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (* exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (div exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (/ exp1 exp2))
-        (else (error "invalid operation on type"))))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;todo \/
-(define (expon exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (exph exp1 exp2)) ;write exp helper
-        (else (error "invalid operation on type"))))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;todo \/
-(define (rem exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (/ exp1 exp2)) ;figure out rem
-        (else (error "invalid operation on type"))))
-
-(define (lt exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (< exp1 exp2))
-        (else (error "invalid operation on type"))))
-(define (gt exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (> exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (gteq exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (>= exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (lteq exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (<= exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (eq exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (= exp1 exp2))
-        (else (error "invalid operation on type"))))
-;confused why land and lor take interger inputs
-(define (land exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (and exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (lor exp1 exp2)
-  (cond ((and (number? exp1) (number? exp2)) (or exp1 exp2))
-        (else (error "invalid operation on type"))))
-
-(define (operate op exp1 exp2)
-  (cond ((equal? exp1 "undefined") exp1)
-        ((equal? exp2 "undefined") exp2)
-        ((equal? '+ op) (add exp1 exp2))
-        ((equal? '- op) (sub exp1 exp2))
-        ((equal? '/ op) (div exp1 exp2))
-        ((equal? '* op) (mult exp1 exp2))
-        ((equal? '@ op) (expon exp1 exp2))
-        ((equal? '"#" op) (rem exp1 exp2))
-        ((equal? '< op) (lt exp1 exp2))
-        ((equal? '> op) (gt exp1 exp2))
-        ((equal? '= op) (eq exp1 exp2))
-        ((equal? '<= op) (lteq exp1 exp2))
-        ((equal? '>= op) (gteq exp1 exp2))
-        ((equal? '& op) (land exp1 exp2))
-        ((equal? '% op) (lor exp1 exp2))))
-
-;; "-" will be problem; both bi and un
-(define (is-un-op? op)
-  (or (equal? '~) (equal? '-)))
-
-(define (is-bin-op? op)
-  (or (equal? '+ op) (equal? '- op) (equal? '/ op) (equal? '* op)
-      (equal? '@ op) (equal? '"#" op) (equal? '< op) (equal? '> op)
-      (equal? '= op) (equal? '<= op) (equal? '>= op) (equal? '& op)
-      (equal? '% op)))
-
-(define (evaluator exp state)
-  (cond ((number? exp) exp)
-        ((equal? "undefined" exp) exp)
-        ((equal? 'true exp) exp)
-        ((equal? 'false exp) exp)
-        ((symbol? exp) (state-get-value state exp))
-        ((is-bin-op? (car exp)) (operate (car exp) (evaluator (cadr exp) state) (evaluator (caddr exp) state)))
-        ((is-un-op? (car exp)))))
-
-;; INPUT: A PROGRAM
-;; A PROGRAM has syntactic structure (program stmt)
-;; OUTPUT: THE STATE that results from executing the program
-;;         in an empty state.
-(define (interpret-program pgm)
-  (interpret (program-get-body pgm) (state-create-empty)))
-
 
 ;; INPUT: A PROGRAM
 ;; A PROGRAM has syntactic structure (program stmt)
@@ -345,7 +244,7 @@
 ;; INPUT: STATEMENT and STATE
 ;; OUTPUT: The state that results from executing STATEMENT in STATE
 (define (interpret stmt state)
-  (display "stmt: ")(display stmt) (newline) (display "state: ")(display state) (newline)
+  (display stmt) (newline) (display state) (newline)
   (let ((kind (car stmt)))
     (cond ((equal? kind 'block) (interpret-block stmt state))
           ((equal? kind 'declare) (interpret-declaration stmt state))
@@ -354,63 +253,16 @@
           ((equal? kind 'sprint) (interpret-sprint stmt state))
           ((equal? kind 'while) (interpret-while stmt state))       
           (else (error (string-append "statement expected but saw (" (exp->string stmt) "...) instead."))))))
-
-;block
+;;intpret block todo
 (define (interpret-block stmt state)
-  (display "block ") (newline)
-  ;(display (null? (cdr stmt)))
-  (cond ((or (null? stmt) (null? (cdr stmt))) state)
-        ((null? (cadr stmt)) (interpret-block (cdr stmt) state))
-        (else (interpret-block (cdr stmt) (interpret (cadr stmt) state)))))
- 
-;declare //good?
-(define (interpret-declaration stmt state)
-  (display "declare ") (newline)
-  (state-add state (caddr stmt)))
+  (block-get-body stmt))
 
-;assign;;
-(define (interpret-assignment stmt state)
-(state-update state (cadr stmt) (evaluator (caddr stmt) state)))
 
-;while
-(define (interpret-while stmt state)
-  (display "while ") (newline)
-  (display (evaluator (cadr stmt) state))
-  (cond ((evaluator (cadr stmt) state) (display "doing loop ") (interpret-while stmt (interpret (caddr stmt) state)));do stuff
-        (else state))) ;dont
 
-;if
-(define (interpret-if stmt state)
-  (display "if ") (newline)
-  (cond ((evaluator (cadr stmt) state) (display "doing if ") (interpret (caddr stmt) state));do stuff
-        (else state)))
-
-;sprint
-(define (interpret-sprint stmt state)
-  (newline)
-  (display (cadr stmt))
-  (display (evaluator (caddr stmt) state))
-  (newline)
-  state)
-         
-         
   
 
- 
 
-
-
-
-
-
-
-
-
-
-
-
-
-;Sample program
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define pgm '(program 
               (block
                (declare int n)
@@ -422,20 +274,69 @@
                 (declare int local)
                 (:= n 5)
                 (:= local n)
-                (if (> local 0)
+                (while (> local 0)
                        (block
                         (:= result (* result local))
                         (:= local (- local 1)))))
               (sprint "result: " result)
-              (if (! error) (sprint "a") (sprint "b")))))
+              (if (~ error) (sprint "a") (sprint "b")))))
 
-(define simpgm '(program
-                 (block
-                  (declare int n)
-                  (:= n 5)
-                  (while (> n 1)
-                      (:= n (- n 1))
-                      (sprint "n: " n)
-                      ))))
+;(interpret-program pgm)
 
-(interpret-program simpgm)
+(cdr (car (cdr pgm)))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Validity checker
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+; ( program <block> )
+(define (validpro code)
+  (cond ((equal? (car code) 'program) (validblock (program-get-body code) (typemap-create-empty)))
+        (else #f)))
+; ( block <declarations> <block> )
+(define (validblock code typemap)
+  (cond ((equal? (car code) 'block) (valid-inblock (car(cdr code)) typemap))
+        (else #f)))
+; {<decl>} {<statemnt>}
+;<statemnt> => <BLOCK> | <ASSIGN> | <IF> | <WHILE> | <SPRINT>;
+(define (valid-inblock code typemap);
+  (let ((type (car code)))
+    (cond ((equal? type 'block) (valid-inblock (car(cdr code)) typemap)); cdr <declarations> <body> => {<decl>} {<statement>}
+          ((equal? type 'declare) (valid-declare (car(cdr code)) typemap)); cdr <type> <variable>
+          ((equal? type ':=)      ); cdr <variable> <expression>
+          ((equal? type 'if)      ); cdr <expression> <statement> <statment> 
+          ((equal? type 'while)   ); cdr <expression> <statement>
+          ((equal? type 'sprint)  ); cdr <expression> [ <expression> ]
+          ( else #f))))
+;<type> <variable>
+(define (valid-declare code typemap)
+  (let ((type (car code)))
+    (cond ((or (equal? type 'int) (equal? type 'boolean))
+           (cond ((valid-var-name ))))))) ;trash;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+  
+          
+
+  
+
+
+           
+
+
+
+
+
+
+
+
+;(define (is-program-valid? pgm))
