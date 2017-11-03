@@ -458,7 +458,7 @@
                           (:= error true)
                       )))))
 
-(interpret-program simpgm)
+;(interpret-program simpgm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;valid oh gosh whyy?
@@ -468,37 +468,58 @@
   (cond ((null? list) bool)
          (else (aand (and bool (car list)) (cdr list)))))
 
-(define (valid-var-name name typemap)
+(define (valid-var-name name)
   (cond ((or (number? name) (equal? name 'int) (equal? name 'boolean)
             (bool? name) (equal? name 'program) (equal? name 'block) (equal? name 'declare)
             (equal? name 'if) (equal? name 'while) (equal? name 'sprint)) #f)
         (else #t)))
 
-;return (bool typemap)?
-;(define (valid-dec pgm typemap)
- ; (cond ((and (equal? (car pgm) 'declare) (valid-var-name (caddr pgm) typemap)))
-    ;    (else #f)))
 
-;return (bool typemap)?
-;(define (valid-block pgm typemap)
- ; (newline)
- ; (display (block-get-declarations pgm))
- ; (cond ((equal? (car pgm) 'block) ;(valid-dec (cadr pgm) typemap))
-       ;  (and (aand #t (map (lambda (x) (valid-dec x typemap)) (block-get-declarations pgm)))
-         ;(aand #t (map (lambda (x) 
-      ;  (else #f)))))
+(define (valid-dec pgm)
+  (cond ((and (equal? (car pgm) 'declare) (valid-var-name (caddr pgm))))
+        (else #f)))
+
+(define (valid-statement pgm)
+  (newline)
+  (display (car pgm))
+  (let ((kind (car pgm)))
+    (cond ((equal? kind 'block) (valid-block pgm))
+          ((equal? kind 'if) (valid-if pgm))
+          ((equal? kind ':=) (valid-assign pgm))
+          ((equal? kind 'sprint) (valid-sprint pgm))
+          ((equal? kind 'while) (valid-while pgm))       
+          (else #f))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (valid-if pgm) #t)
+
+(define (valid-sprint pgm) #t)
+
+(define (valid-while pgm) #t)
+
+(define (valid-assign pgm) #t)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (valid-block pgm)
+  (newline)
+  (display (block-get-body pgm))
+  (cond ((equal? (car pgm) 'block) ;(valid-dec (cadr pgm) typemap))
+         (and (aand #t (map (lambda (x) (valid-dec x)) (block-get-declarations pgm)))
+         (aand #t (map (lambda (x)(valid-statement x)) (block-get-body pgm))))) 
+        (else #f)))
                
 ;return bool
-(define (valid-pgm pgm typemap)
-  (cond ((equal? (car pgm) 'program) (valid-block (cadr pgm) typemap))
+(define (valid-pgm pgm)
+  (cond ((equal? (car pgm) 'program) (valid-block (cadr pgm)))
         (else #f)))
 
 (define (is-program-valid? pgm)
-  (valid-pgm pgm (typemap-create-empty)))
+  (valid-pgm pgm))
 
 ;;test
 ;(and #t #f)
 ;(apply append '((1 2) (3 4)))
 ;(aand '#t '(#t #t #t))
-;(is-program-valid? simpgm)
+(is-program-valid? simpgm)
 
