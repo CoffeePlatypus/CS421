@@ -28,8 +28,8 @@
 ;; INPUT: an element of the ART-C language
 ;; OUTPUT: the type of that element
 (define (type-of val)
-  (cond ((number? val) 'int)
-        ((boolean? val) 'boolean)))
+  (cond ((or (number? val) (equal? val 'int)) 'int)
+        ((or (bool? val) (equal? val 'boolean)) 'boolean)))
 
 ;; A MAP is a list of key-value pairs
 ;; INPUT: a MAP and a KEY
@@ -309,12 +309,14 @@
 (define (operate op exp1 exp2)
   (cond ((equal? exp1 "undefined") exp1)
         ((equal? exp2 "undefined") exp2)
+        ((equal? exp1 'int) "undefined")
+        ((equal? exp1 'boolean) "undefined")
         ((equal? '+ op) (add exp1 exp2))
         ((equal? '- op) (sub exp1 exp2))
         ((equal? '/ op) (div exp1 exp2))
         ((equal? '* op) (mult exp1 exp2))
         ((equal? '@ op) (expon exp1 exp2))
-        ((equal? '^ op) (rem exp1 exp2))
+        ((equal? '? op) (rem exp1 exp2))
         ((equal? '< op) (lt exp1 exp2))
         ((equal? '> op) (gt exp1 exp2))
         ((equal? '= op) (eq exp1 exp2))
@@ -330,7 +332,7 @@
 
 (define (is-bin-op? op)
   (or (equal? '+ op) (equal? '- op) (equal? '/ op) (equal? '* op)
-      (equal? '@ op) (equal? '^ op) (equal? '< op) (equal? '> op)
+      (equal? '@ op) (equal? '? op) (equal? '< op) (equal? '> op)
       (equal? '= op) (equal? '<= op) (equal? '>= op) (equal? '& op)
       (equal? '% op)))
 ;; im not convinced these are correct
@@ -381,7 +383,7 @@
 ;; INPUT: STATEMENT and STATE
 ;; OUTPUT: The state that results from executing STATEMENT in STATE
 (define (interpret stmt state)
-  (display "stmt: ")(display stmt) (newline) (display "state: ")(display state) (newline)
+  ;(display "stmt: ")(display stmt) (newline) (display "state: ")(display state) (newline)
   (let ((kind (car stmt)))
     (cond ((equal? kind 'block) (interpret-block stmt state))
           ((equal? kind 'declare) (interpret-declaration stmt state))
@@ -393,31 +395,39 @@
 
 ;block
 (define (interpret-block stmt state)
-  (display "block ") (newline)
+  ;(display "block ") (newline)
   ;(display (null? (cdr stmt)))
   (cond ((or (null? stmt) (null? (cdr stmt))) state)
         ((null? (cadr stmt)) (interpret-block (cdr stmt) state))
         (else (interpret-block (cdr stmt) (interpret (cadr stmt) state)))))
  
-;declare //good?
+;declare put in state as (name type)
 (define (interpret-declaration stmt state)
-  (display "declare ") (newline)
-  (state-add state (caddr stmt)))
+  ;(display "declare ") (newline)
+  (state-update (state-add state (caddr stmt)) (caddr stmt) (cadr stmt)))
 
-;assign;;
-(define (interpret-assignment stmt state)
-(state-update state (cadr stmt) (evaluator (caddr stmt) state)))
+;assign;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (type-match? name exp state)
+  (equal? (type-of(state-get-value state name)) (type-of exp)))
+
+
+(define (assign-check name exp state)
+  (cond ((type-match? name exp state) (state-update state name exp))
+        (else (error "assignment to wrong type") state)))
+
+(define (interpret-assignment stmt state) ;;;;;;
+  (assign-check (cadr stmt) (evaluator (caddr stmt) state) state))
 
 ;while
 (define (interpret-while stmt state)
-  (display "while ") (newline)
-  (cond ((symbol->bool (evaluator (cadr stmt) state)) (display "doing loop ") (interpret-while stmt (interpret (caddr stmt) state)));do stuff
+  ;(display "while ") (newline)
+  (cond ((symbol->bool (evaluator (cadr stmt) state)) (interpret-while stmt (interpret (caddr stmt) state)));do stuff
         (else state))) ;dont
 
 ;if
 (define (interpret-if stmt state)
-  (display "if ") (newline)
-  (cond ((symbol->bool (evaluator (cadr stmt) state)) (display "doing if ") (interpret (caddr stmt) state));do stuff
+  ;(display "if ") (newline)
+  (cond ((symbol->bool (evaluator (cadr stmt) state)) (interpret (caddr stmt) state));do stuff
         ((null? (cadddr stmt)) state)
         (else (interpret (cadddr stmt) state))))
 
@@ -450,15 +460,15 @@
                  (block
                   (declare int n)
                   (declare boolean error)
-                  (:= n 5)
+                  (:= n 6)
                   (:= error false)
                   (if (> n 0)
                          (block
-                          (:= n (^ n 3))
+                          (:= n (? n 3))
                           (:= error true)
                       )))))
 
-;(interpret-program simpgm)
+(interpret-program simpgm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;valid oh gosh whyy? ->better to type check dynamiclly 
@@ -473,7 +483,6 @@
             (bool? name) (equal? name 'program) (equal? name 'block) (equal? name 'declare)
             (equal? name 'if) (equal? name 'while) (equal? name 'sprint)) #f)
         (else #t)))
-
 
 (define (valid-dec pgm)
   (cond ((and (equal? (car pgm) 'declare) (valid-var-name (caddr pgm))))
@@ -543,9 +552,4 @@
 (define (is-program-valid? pgm)
   (valid-pgm pgm))
 
-;;test
-;(and #t #f)
-;(apply append '((1 2) (3 4)))
-;(aand '#t '(#t #t #t))
-(is-program-valid? simpgm)
-
+;(is-program-valid? simpgm)
