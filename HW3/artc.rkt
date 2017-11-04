@@ -325,7 +325,7 @@
 
 ;; "-" will be problem; both bi and un -> maybe fixed
 (define (is-un-op? op exp2)
-  (display exp2)
+  ;(display exp2)
   (or (equal? op '~) (and (equal? op '-) (null? exp2))))
 
 (define (is-bin-op? op)
@@ -445,7 +445,7 @@
                         (:= local (- local 1)))))
               (sprint "result: " result)
               (if (~ error) (sprint "a") (sprint "b")))))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define simpgm '(program
                  (block
                   (declare int n)
@@ -461,7 +461,7 @@
 ;(interpret-program simpgm)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;valid oh gosh whyy?
+;valid oh gosh whyy? ->better to type check dynamiclly 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (aand bool list)
@@ -478,32 +478,58 @@
 (define (valid-dec pgm)
   (cond ((and (equal? (car pgm) 'declare) (valid-var-name (caddr pgm))))
         (else #f)))
+(define (false pgm call)
+  (newline)
+  ;(display "        false ")
+  ;(display call)
+  ;(display " ")
+  ;(display pgm)
+  )
 
 (define (valid-statement pgm)
-  (newline)
-  (display (car pgm))
+  ;(newline)
+  ;(display (car pgm))
   (let ((kind (car pgm)))
     (cond ((equal? kind 'block) (valid-block pgm))
           ((equal? kind 'if) (valid-if pgm))
           ((equal? kind ':=) (valid-assign pgm))
           ((equal? kind 'sprint) (valid-sprint pgm))
           ((equal? kind 'while) (valid-while pgm))       
-          (else #f))))
+          (else (false pgm 'smt) #f))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (valid-if pgm) #t)
+(define (valid-exp pgm)
+  (cond ((number? pgm) #t)
+        ((bool? pgm) #t)
+        ((symbol? pgm) #t)
+        ((not (list? pgm)) (false pgm) #f)
+        ((is-un-op? (car pgm) (cdr(cdr pgm))) (valid-exp (cadr pgm)))
+        ;((null? (cdr(cdr(pgm)))) #f)
+        ((is-bin-op? (car pgm)) (and (valid-exp (cadr pgm)) (valid-exp (caddr pgm))))
+        (else (false pgm 'exp) #f)))
 
-(define (valid-sprint pgm) #t)
+(define (valid-if pgm) ;; cadr or car
+  (cond ((and (valid-exp (cadr pgm)) (valid-statement (caddr pgm)))
+         (cond ((null? (cdr(cdr(cdr pgm)))) #t)
+               (else (valid-statement (cadddr pgm)))))
+        (else (false pgm 'if) #f)))
 
-(define (valid-while pgm) #t)
+(define (valid-sprint pgm)
+  (cond ((string? (cadr pgm))
+         (cond ((null? (cdr(cdr pgm))) #t)
+               (else (valid-exp (caddr pgm)))))
+        (else (false pgm 'sprint) #f)))
 
-(define (valid-assign pgm) #t)
+(define (valid-while pgm)
+  (cond ((valid-exp (cadr pgm)) (valid-statement (caddr pgm)))
+        (else (false pgm 'while) #f)))
 
+(define (valid-assign pgm)
+  (cond ((symbol? (cadr pgm)) (valid-exp (caddr pgm)))
+        (else (false pgm 'ass) #f)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (valid-block pgm)
-  (newline)
-  (display (block-get-body pgm))
   (cond ((equal? (car pgm) 'block) ;(valid-dec (cadr pgm) typemap))
          (and (aand #t (map (lambda (x) (valid-dec x)) (block-get-declarations pgm)))
          (aand #t (map (lambda (x)(valid-statement x)) (block-get-body pgm))))) 
