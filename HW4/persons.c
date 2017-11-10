@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include “persons.h”
+#include "persons.h"
 #include <stdio.h>
 
 //Person ///////////////////////////////////////////////////////////////////
@@ -10,23 +10,28 @@ struct Person *personCreate(char *first, char *last, int age, char *email) {
   person->first=first;
   person->last=last;
   person->age=age;
-  person->email=age;
+  person->email=email;
   return person;
 }
 
 void personDelete(struct Person *person) {
-  free(person->first);
+  printf("%s\n", "fail");
+  free(person->first);  //doesnt work? why?
+  printf("%s\n", "first");
   free(person->last);
+  printf("%s\n", "last");
   free(&person->age); //where age is located?
+  printf("%s\n", "age");
   free(person->email);
+  printf("%s\n", "email");
   free(person);
 }
 
-char *personFirst(struct Person *person) {
+char *personFirstName(struct Person *person) {
   return person->first;
 }
 
-char *personLast(struct Person *person) {
+char *personLastName(struct Person *person) {
   return person->last;
 }
 
@@ -48,13 +53,14 @@ struct PersonList *plCreate() {
   return list;
 }
 
-void plDelete(struct PersonList *db, int copyType) {
+void plDelete(struct PersonList *db, enum CopyType copyType) {
   //if(copytype) { // pd deep -> delete people
   //}else{ //pd shallow -> list only delete
   //}
-  struct Node *temp = db->head;
+  struct Node *temp = db->first;
   struct Node *next;
-  for(int i=0; i<db->size; i++) {
+  int i;
+  for(i=0; i<db->size; i++) {
     if(copyType) {
       personDelete(temp->value);
     }
@@ -62,10 +68,18 @@ void plDelete(struct PersonList *db, int copyType) {
     free(temp);
     temp=next;
   }
-  free(db->size);
+  free(&(db->size));
   free(db);
 }
 
 void plAdd(struct PersonList *db, struct Person *p) {
-  struct Node temp = (struct Node)
+  struct Node *temp = (struct Node *) malloc(sizeof(struct Node));
+  temp->next = db->first;
+  temp->value = p;
+  db->first=temp;
+  db->size++;
+}
+
+void plRemove(struct PersonList *db, struct Person *p) {
+  
 }
