@@ -15,16 +15,16 @@ struct Person *personCreate(char *first, char *last, int age, char *email) {
 }
 
 void personDelete(struct Person *person) {
-  printf("%s\n", "fail");
-  free(person->first);  //doesnt work? why?
+  //printf("%s\n", &(person->first));
+  free(&(person->first));  //now can only free first
   printf("%s\n", "first");
-  free(person->last);
+  free(&(person->last));
   printf("%s\n", "last");
   free(&person->age); //where age is located?
   printf("%s\n", "age");
-  free(person->email);
+  free(&(person->email));
   printf("%s\n", "email");
-  free(person);
+  free(person); // <-this works
 }
 
 char *personFirstName(struct Person *person) {
@@ -81,5 +81,79 @@ void plAdd(struct PersonList *db, struct Person *p) {
 }
 
 void plRemove(struct PersonList *db, struct Person *p) {
-  
+  //todo later when I know how to free
+}
+
+struct PersonList *plFindByFirstName(struct PersonList *db, char *name) {
+  struct PersonList *result = plCreate();
+  int i;
+  struct Node *temp = db->first;
+  for(i=0; i<db->size;i++) {
+    if(personFirstName(temp->value) == name) {
+      plAdd(result, temp->value);
+    }
+    temp = temp->next;
+  }
+  return result;
+}
+
+struct PersonList *plFindByLastName(struct PersonList *db, char *name) {
+  struct PersonList *result = plCreate();
+  int i;
+  struct Node *temp = db->first;
+  for(i=0; i<db->size;i++) {
+    if(personLastName(temp->value) == name) {
+      plAdd(result, temp->value);
+    }
+    temp = temp->next;
+  }
+  return result;
+}
+
+struct PersonList *plFindAtLeastAsOldAs(struct PersonList *db, int age) {
+  struct PersonList *result = plCreate();
+  int i;
+  struct Node *temp = db->first;
+  for(i=0; i<db->size;i++) {
+    if(personAge(temp->value) >= age) {
+      plAdd(result, temp->value);
+    }
+    temp = temp->next;
+  }
+  return result;
+}
+
+struct Person *plGet(struct PersonList *db, int n) {
+  struct Person *p;
+  int i;
+  n++;
+  struct Node *temp = db->first;
+  for(i=0; i<=n; i++) {
+    p=temp->value;
+    temp->next;
+  }
+  return p;
+}
+
+int plSize(struct PersonList *db) {
+  return db->size;
+}
+
+//Print Functions
+void printPerson(struct Person * p) {
+  printf("First Name: %s\n", personFirstName(p));
+  printf("Last Name: %s\n", personLastName(p));
+  printf("Age: %d\n", personAge(p));
+  printf("Email: %s\n", personEmail(p));
+}
+
+void printList(struct PersonList *db) {
+  int i;
+  struct Node *temp = db->first;
+  printf("%s\n", "" );
+  for(i=0; i<(db->size); i++) {
+    printPerson(temp->value);
+    temp=temp->next;
+    printf("%s\n", "" );
+  }
 }

@@ -44,4 +44,9 @@ struct PersonList *plFindAtLeastAsOldAs(struct PersonList *db, int age);
 struct Person *plGet(struct PersonList *db ,int n);
 int plSize(struct PersonList *db);
 
+// Stuff I added// causes error?
+// void printList(struct PersonList *db);
+// void printPerson(struct Node * n)
+
+
 #endif
