@@ -7,23 +7,22 @@
 
 struct Person *personCreate(char *first, char *last, int age, char *email) {
   struct Person *person = (struct Person *) malloc(sizeof(struct Person));
-  person->first=first;
-  person->last=last;
+  person->first=strdup(first);
+  person->last=strdup(last);
   person->age=age;
-  person->email=email;
+  person->email=strdup(email);
   return person;
 }
 
 void personDelete(struct Person *person) {
-  //printf("%s\n", &(person->first));
-  free(&(person->first));  //now can only free first
-  printf("%s\n", "first");
-  free(&(person->last));
-  printf("%s\n", "last");
-  free(&person->age); //where age is located?
-  printf("%s\n", "age");
-  free(&(person->email));
-  printf("%s\n", "email");
+  free(person->first);  //now can only free first
+  // printf("%s\n", "first");
+  free(person->last);
+  // printf("%s\n", "last");
+  // free(&person->age);
+  // printf("%s\n", "age");
+  free(person->email);
+  // printf("%s\n", "email");
   free(person); // <-this works
 }
 
@@ -49,7 +48,8 @@ int personAge(struct Person *person) {
 struct PersonList *plCreate() {
   struct PersonList *list = (struct PersonList *) malloc(sizeof(struct PersonList));
   list->size=0;
-  list->first=NULL;
+  list->first=(struct Node *) calloc(1,sizeof(struct Node));
+  list->first->value = (struct Person *) calloc(1,sizeof(struct Person *));
   return list;
 }
 
@@ -58,17 +58,21 @@ void plDelete(struct PersonList *db, enum CopyType copyType) {
   //}else{ //pd shallow -> list only delete
   //}
   struct Node *temp = db->first;
-  struct Node *next;
+  struct Node *next = NULL;
   int i;
   for(i=0; i<db->size; i++) {
+    //printf("%d\n", i);
     if(copyType) {
       personDelete(temp->value);
+    }
+    if(!next) {
+      free(next);
     }
     next=temp->next;
     free(temp);
     temp=next;
   }
-  free(&(db->size));
+//printf("Loop\n");
   free(db);
 }
 
@@ -80,8 +84,54 @@ void plAdd(struct PersonList *db, struct Person *p) {
   db->size++;
 }
 
-void plRemove(struct PersonList *db, struct Person *p) {
-  //todo later when I know how to free
+int equalPeople(struct Person *p1, struct Person *p2) {
+  return ( !strcmp(personFirstName(p1), personFirstName(p2))
+  && !strcmp(personLastName(p1), personLastName(p2))
+  && !strcmp(personEmail(p1), personEmail(p2))
+  && (personAge(p1) == personAge(p2)));
+}
+
+void plRemovePerson(struct PersonList*db, struct Person *p) {
+  while(db->first && equalPeople(db->first->value, p)) {
+    printf("%s\n", "remove" );
+    db->first = db->first->next;
+    db->size--;
+  }
+  struct Node *temp = db->first;
+  struct Node *next = temp->next;
+  while(next) {
+    printPerson(next->value);
+    if(equalPeople(next->value,p)) {
+      printf("%s\n", "remove1");
+      db->size--;
+      temp->next = next->next;
+      next = temp->next;
+      printf("here\n" );
+    }
+    temp = next;
+    next = temp->next;
+    printf("heeoef\n" );
+    if(next->value) {
+      printf("%s\n", "no seg fault?" );
+    }
+  }
+
+
+  // int i=0;
+  // struct Node *temp = db->first;
+  // while(equalPeople(temp->value, p)) {
+  //   i++;
+  //   temp = temp->next;
+  // }
+  // db->first = temp;
+  // struct Node *next = temp->next;
+  // while(i<=db->size) {
+  //   i++;
+  //   if (equalPeople(next->value, p)) {
+  //     temp->next = next->next;
+  //     next = temp->next;
+  //   }
+  // }
 }
 
 struct PersonList *plFindByFirstName(struct PersonList *db, char *name) {
@@ -89,7 +139,7 @@ struct PersonList *plFindByFirstName(struct PersonList *db, char *name) {
   int i;
   struct Node *temp = db->first;
   for(i=0; i<db->size;i++) {
-    if(personFirstName(temp->value) == name) {
+    if(!strcmp(personFirstName(temp->value), name)) {
       plAdd(result, temp->value);
     }
     temp = temp->next;
@@ -102,7 +152,7 @@ struct PersonList *plFindByLastName(struct PersonList *db, char *name) {
   int i;
   struct Node *temp = db->first;
   for(i=0; i<db->size;i++) {
-    if(personLastName(temp->value) == name) {
+    if(!strcmp(personLastName(temp->value), name)) {
       plAdd(result, temp->value);
     }
     temp = temp->next;

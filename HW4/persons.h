@@ -26,6 +26,10 @@ struct Person {
     int age;
 };
 
+typedef struct PersonList* PListPointer;
+typedef struct Node* NodePointer;
+typedef struct Person* PersonPointer;
+
 struct Person *personCreate(char *f, char *l, int age, char *email);
 char *personFirstName(struct Person *p);
 char *personLastName(struct Person *p);
@@ -45,8 +49,8 @@ struct Person *plGet(struct PersonList *db ,int n);
 int plSize(struct PersonList *db);
 
 // Stuff I added// causes error?
-// void printList(struct PersonList *db);
-// void printPerson(struct Node * n)
+void printList(struct PersonList *db);
+void printPerson(struct Person * p);
 
 
 #endif
