@@ -26,9 +26,9 @@ struct Person {
     int age;
 };
 
-typedef struct PersonList* PListPointer;
-typedef struct Node* NodePointer;
-typedef struct Person* PersonPointer;
+typedef struct PersonList* ListPoint;
+typedef struct Node* NodePoint;
+typedef struct Person* PerPoint;
 
 struct Person *personCreate(char *f, char *l, int age, char *email);
 char *personFirstName(struct Person *p);
