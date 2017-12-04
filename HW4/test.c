@@ -7,8 +7,6 @@ int main(int argc, char ** argv) {
   struct PersonList *listy = plCreate();
 
   plAdd(listy, personCreate("Rose","Froegel",18,"rfroegel5.99@gmail.com"));
-
-
   plAdd(listy, personCreate("Joseph", "Froegel", 15, "Fang78913@gmail.com"));
   plAdd(listy, personCreate("Noah", "Froegel", 10, "NA"));
   plAdd(listy, personCreate("Julia", "2ndJulia", 20, "31415nard@gmail.com"));
