@@ -1,0 +1,16 @@
+package predicates;
+
+public class GreaterThan implements Predicate <T implements Comparable<T>> {
+	
+	private T reference;
+	
+	public GreaterThan(<T implements Comparable<T>> r) {
+		reference = r;
+	}
+	
+	@Override
+	public boolean accepts(T t) {
+		return reference.compareTo(t)<0;
+	}
+
+}

@@ -9,7 +9,7 @@ public class GreaterThan<T extends Comparable<T>> implements Predicate<T>  {
 	}
 	
 	public boolean accepts(T t) {
-		return reference.compareTo(t)<=0;
+		return reference.compareTo(t)<0;
 	}
 
 }

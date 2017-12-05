@@ -3,7 +3,7 @@ package predicates;
 import java.util.Iterator;
 import java.util.List;
 
-public class Subset<T extends List<T>> implements Predicate<T> {
+public class Subset<T extends List> implements Predicate<T> {
 	
 	private T referenceList;
 	

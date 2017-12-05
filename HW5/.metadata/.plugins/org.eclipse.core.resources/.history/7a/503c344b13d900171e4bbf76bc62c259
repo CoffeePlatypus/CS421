@@ -1,0 +1,7 @@
+package predicates;
+
+public class Subset implements Predicate<T> {
+	
+	public Subset()
+
+}

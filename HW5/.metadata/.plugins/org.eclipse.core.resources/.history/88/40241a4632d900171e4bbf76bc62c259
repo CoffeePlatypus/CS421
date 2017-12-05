@@ -1,0 +1,19 @@
+package predicates;
+
+import java.util.List;
+
+public class Subset<T extends List> implements Predicate<T> {
+	
+	private T referenceList;
+	
+	public Subset(T list) {
+		referenceList=list;
+	}
+
+	@Override
+	// Which should be a subset of the other
+	public boolean accepts(T t) {
+		return false;
+	}
+
+}
