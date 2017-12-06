@@ -14,7 +14,7 @@ public class Subset<T extends List<T>> implements Predicate<T> {
 	@Override
 	// Which should be a subset of the other
 	public boolean accepts(T t) {
-		Iterator i = t.listIterator();
+		Iterator<T> i = t.listIterator();
 		while(i.hasNext()) {
 			if(!referenceList.contains(i.next())) {
 				return false;

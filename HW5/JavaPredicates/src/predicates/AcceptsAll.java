@@ -10,8 +10,7 @@ public class AcceptsAll<T> implements Predicate<Predicate<T>> {
 	public AcceptsAll(List<T> l) {
 		refrenceList =l;
 	}
-	// So the reference list is not of predicates but accepts takes a predicate as input?
-	//
+	
 	@Override
 	public boolean accepts(Predicate<T> t) {
 		Iterator<T> it = refrenceList.iterator();

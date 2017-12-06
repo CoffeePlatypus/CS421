@@ -10,6 +10,6 @@ public class SimilarColor implements Predicate<Color> {
 	}
 
 	public boolean accepts(Color t) {
-		return (color.getBlue() - t.getBlue()) + (color.getGreen() - t.getGreen()) +  (color.getRed() - t.getRed()) <= 30;
+		return Math.abs((color.getBlue() - t.getBlue()) + (color.getGreen() - t.getGreen()) +  (color.getRed() - t.getRed())) <= 30;
 	 }
 }

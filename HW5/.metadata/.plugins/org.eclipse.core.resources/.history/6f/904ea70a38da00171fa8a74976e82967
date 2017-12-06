@@ -1,0 +1,20 @@
+package predicates;
+
+public class Tester {
+	public static void main(String [] args) {
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	public class IsPositive implements Predicate<Integer> {
+	    public boolean accepts(Integer t) {
+	      return t > 0;
+	   }
+	}
+}

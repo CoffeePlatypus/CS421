@@ -16,12 +16,3 @@ memberSet function element = function element
 
 complementSet :: Set a -> Set a
 complementSet funct = (\x-> (not) (funct x))
-
-test1 = memberSet (setSuchThat (\x -> x == "coke")) "coke"
-test2 = memberSet (setSuchThat (\x -> x == "coke")) "pepsi"
-test3 = memberSet (complementSet (setSuchThat(\ x -> x == "coke"))) "coke"
-test4 = memberSet (unionSet (setSuchThat (\x -> x == "coke"))   (setSuchThat (\x -> x == "pepsi"))) "pepsi"
-test5 = memberSet (unionSet (setSuchThat(\ x -> x == "coke"))  (setSuchThat(\ x -> x == "pepsi"))) "coke"
-test6 = memberSet (unionSet (setSuchThat(\ x -> x == "coke"))   (setSuchThat(\ x -> x == "pepsi"))) "sprite"
-test7 = memberSet (intersectSet (setSuchThat(\ x -> x == "coke"))   (setSuchThat(\ x -> x == "pepsi"))) "coke"
-test8 = memberSet (complementSet(setSuchThat(\x -> x > 0))) 5 

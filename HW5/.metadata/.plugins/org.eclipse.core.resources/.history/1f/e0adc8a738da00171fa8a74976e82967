@@ -1,0 +1,25 @@
+package predicates;
+
+import java.awt.Color;
+
+public class Tester {
+	public static void main(String [] args) {
+		SimilarColor pred1 = new SimilarColor( new Color(10,10,10));
+				
+		System.out.println(pred1.accepts(new Color(11,11,11)));
+		System.out.println(pred1.accepts(new Color(255,255,255)));
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	public class IsPositive implements Predicate<Integer> {
+	    public boolean accepts(Integer t) {
+	      return t > 0;
+	   }
+	}
+}

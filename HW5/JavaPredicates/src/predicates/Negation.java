@@ -1,10 +1,10 @@
 package predicates;
 
-public class Negation<T extends Predicate<T>> implements Predicate<T> {
+public class Negation<T> implements Predicate<T> {
 	
-	private T reference;
+	private Predicate<T> reference;
 	
-	public Negation(T r) {
+	public Negation(Predicate<T> r) {
 		reference = r;
 	}
 

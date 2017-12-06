@@ -1,0 +1,24 @@
+package predicates;
+
+import java.awt.Color;
+
+public class Tester {
+	public static void main(String [] args) {
+		GreaterThan<String> temp = new GreaterThan<String>("s");
+		System.out.println(temp.accepts("start"));
+		System.out.println(temp.accepts("banana"));
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	public class IsPositive implements Predicate<Integer> {
+	    public boolean accepts(Integer t) {
+	      return t > 0;
+	   }
+	}
+}

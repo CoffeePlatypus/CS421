@@ -1,0 +1,30 @@
+package predicates;
+
+import java.awt.Color;
+import java.util.LinkedList;
+
+public class Tester {
+	public static void main(String [] args) {
+//		LinkedList<Integer> listy = new LinkedList<Integer>();
+//		for(int i =0; i<10;i++) {
+//			listy.add(new Integer(i));
+//		}
+//		
+//		Subset s = new Subset(listy);
+//		LinkedList<Integer> lis = new LinkedList<Integer>();
+//		for(int i =2; i<11;i++) {
+//			lis.add(new Integer(i));
+//		}
+//		System.out.println(s.accepts(lis));
+		
+		StartsWith str = new StartsWith("a");
+		Negation neg = new Negation(str);
+		System.out.println(neg.accepts("apple"));
+		System.out.println(neg.accepts("banana"));
+		
+		
+		
+		
+	}
+	
+}
