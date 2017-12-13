@@ -45,19 +45,6 @@ detach n ((a,b): zs)
 
 --paths--------------------------------------------------
 --paths:: Node -> Node -> Graph -> [Path]
-paths n1 n2 g = pathy (neighbors n1 g) n1 n2 g
-
-
-pathy (x:xs) n1 n2 g
- | x == n2 = [n2]
- | otherwise = [x] ++ pathy (neighbors x g) n1 n2 g
-
-
---paths n1 n2 g
--- | n1 == n2 = [n2]
--- | otherwise = [n1] ++ pathafy(neighbors n1 g) n2 g
-
---pathafy [] _ _ = []
---pathafy (x:xs) n2 g = paths x n2 g
-
-  --[[n1,x,n2]| x <- (neighbors n1 g)]
+paths n1 n2 g
+ | n1 == n2 =[[n1]]
+ | otherwise = [[n1] ++ p2 | p <- neighbors n1 g, p2<- paths p n2 g]
